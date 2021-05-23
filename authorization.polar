@@ -1,10 +1,63 @@
 ### Pseudo-polar for our full authorization rules using imaginary data types ###
 # Typical 'Medical data' points (Immunization, MedicationStatement etc)
-# allow(actor: Actor, "search-type", immunization: Immunization) if
-#     access_frozen_check(actor, immunization) and (  
-#         self_check(actor, immumization) or
-#         source_check(actor, immunization) or
-#         consent_check(actor, immunization));
+allow(patient: Patient, "read", immunization: Immunization) if
+    access_frozen_check(patient) and
+        self_check(patient, immumization);
+
+allow(carer: RelatedPerson, "read", immunization: Immunization) if
+    access_frozen_check(carer, immunization) and (  
+        source_check(carer, immunization) or
+        consent_check(carer, immunization));
+
+allow(practitioner, Practitioner, "read", immunization: Immunization) if
+    access_frozen_check(practitioner, immunization) and (  
+        source_check(practitioner, immunization) or
+        consent_check(practitioner, immunization));
+
+# Access frozen #
+access_frozen_check(patient: Patient) if 
+    not patient.isAccessFrozen;
+
+access_frozen_check(carer: RelatedPerson, resource: PatientResource) if
+    not carer.isAccessFrozen and 
+        not resource.patient.isAccessFrozen;
+
+access_frozen_check(practitioner: Practitioner, resource: PatientResource) if
+    practitioner.isTeamPro or
+    	not resource.patient.isAccessFrozen;
+
+# self access #
+self_check(patient: Patient, resource) if
+    resource.patient.id == patient.id;
+
+# source access (AKA team data view) #
+source_check(carer: RelatedPerson, resource: PatientResource) if
+    resource.sourcePersonId == carer.id;
+
+source_check(practitioner: Practitioner, resource: PatientResource) if
+    resource.sourceTeamId == practitioner.teamId or
+        resource.sourcePersonId == practitioner.id;
+
+# consent access #
+consent_check(carer: RelatedPerson, resource: PatientResource) if
+    sharing_disabled_check(resource) and (
+    	carerId = carer.id and
+        resource.privacyFlag in resource.patient.consents.(carerId));
+
+consent_check(practitioner: Practitioner, resource: PatientResource) if
+    sharing_disabled_check(practitioner, resource) and
+        (practitioner.isBtgActive or (
+	    practitionerId = practitioner.id and
+	    practitionerTeamId = practitioner.teamId and
+            resource.privacyFlag in resource.patient.consents.(practitionerId)
+	        or resource.privacyFlag in resource.patient.consents.(practitionerTeamId)));
+
+sharing_disabled_check(resource: PatientResource) if
+    not resource.patient.isSharingDisabled;
+
+sharing_disabled_check(practitioner: Practitioner, resource: PatientResource) if
+    practitioner.isTeamPro or
+        not resource.patient.isSharingDisabled;
 
 # More complex Communication type
 # allow(actor: Actor, operation: String, communication: Communication) if 
@@ -15,33 +68,7 @@
 #        source_check(actor, communication) or
 #        consent_check(actor, communication) or 
 #        communication_participant_check(actor, communication));
-
-#self_check(actor: Actor, resource) if
-#    resource.patient = actor.patient;
 #
-#source_check(actor: Actor, resource: Resource) if
-#    actor.teams.contains(resource.sourceTeam) or 
-#        (actor.isPerson = true and 
-#            actor = resource.sourcePerson);
-#
-#consent_check(actor: Actor, resource: Resource) if
-#    sharing_disabled_check(actor, resource) and
-#        (actor.isBtgActive or
-#            resource.patient.consentsFor(actor).contains(resource.privacyFlag) or 
-#                resource.patient.consentsFor(actor.teams).contains(resource.privacyFlag));
-
-# sharing_disabled_check(actor: Actor, resource: Resource) if
-#     # // TODO: MFA - system user semantics for sharing disabled?
-#     not actor.isPerson or 
-#         actor.isTeamPro or
-#             resource.patient.sharingDisabled = false;
-# 
-# access_frozen_check(actor: Actor, resource: Resource) if 
-#     actor.isPerson and 
-#     not actor.isAccessFrozen and 
-#     (actor.isTeamPro = true or 
-#         (not resource.patient.isAccessFrozen));
-
 # private_communication_check(actor: Actor, communication: Communication) if
 # # // TODO: MFA - Semantics of private conversations, can the team access?
 # # what about system users? Current rules say no
@@ -58,3 +85,4 @@
 # # conversation.
 # communication_participant_check(actor: Actor, communication: Communication) if 
 #     communication.participants.contains(actor);
+
