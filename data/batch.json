@@ -1,0 +1,113 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [{
+    "request": {
+      "method": "PUT",
+      "url": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915"
+    },
+    "resource": {
+      "id": "11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+      "resourceType": "Organization",
+      "name": "airedale"
+    }
+  }, {
+    "request": {
+      "method": "PUT",
+      "url": "Organization/30fcc0e2-4705-4dd3-b020-d900672a286c"
+    },
+    "resource": {
+      "id": "30fcc0e2-4705-4dd3-b020-d900672a286c",
+      "resourceType": "Organization",
+      "name": "bradford"
+    }
+  }, {
+    "request": {
+      "method": "PUT",
+      "url": "Practitioner/b60de836-3dfd-4172-90fd-bc1efb4b0adb"
+    },
+    "resource": {
+      "id": "b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+      "resourceType": "Practitioner",
+      "name": [
+        {
+          "use": "official",
+          "family": "Williams",
+          "given": [
+            "Sue"
+          ],
+          "suffix": [
+            "MD"
+          ]
+        }
+      ],
+      "gender": "female",
+      "birthDate": "1975-12-07"
+    }
+  }, {
+    "request": {
+      "method": "PUT",
+      "url": "Practitioner/387f7b1a-95d2-440e-8804-470fd50573fc"
+    },
+    "resource": {
+      "id": "387f7b1a-95d2-440e-8804-470fd50573fc",
+      "resourceType": "Practitioner",
+      "name": [
+        {
+          "use": "official",
+          "family": "Jansen",
+          "given": [
+            "Tina"
+          ],
+          "suffix": [
+            "MD"
+          ]
+        }
+      ],
+      "gender": "female",
+      "birthDate": "1975-12-07"
+    }
+  }, {
+    "request": {
+      "method": "PUT",
+      "url": "PractitionerRole/127c747d-5455-43e6-9d65-10948da03126"
+    },
+    "resource": {
+      "id": "127c747d-5455-43e6-9d65-10948da03126",
+      "resourceType": "PractitionerRole",
+      "active": true,
+      "period": {
+        "start": "2012-01-01"
+      },
+      "practitioner": {
+        "reference": "Practitioner/b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+        "display": "Dr Sue Williams"
+      },
+      "organization": {
+        "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+	"display": "airedale"
+      },
+      "code": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0286",
+              "code": "RP"
+            }
+          ]
+        }
+      ],
+      "specialty": [
+        {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "408443003",
+              "display": "General medical practice"
+            }
+          ]
+        }
+      ]
+    }
+  }]
+}
