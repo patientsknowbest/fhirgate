@@ -8,8 +8,12 @@
     },
     "resource": {
       "id": "11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+      "text": {
+        "status": "additional",
+	"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">>Airedale Hospital</div>"
+      },
       "resourceType": "Organization",
-      "name": "airedale"
+      "name": "Airedale Hospital"
     }
   }, {
     "request": {
@@ -18,8 +22,12 @@
     },
     "resource": {
       "id": "30fcc0e2-4705-4dd3-b020-d900672a286c",
+      "text": {
+        "status": "additional",
+	"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Bradford Hospital</div>"
+      },
       "resourceType": "Organization",
-      "name": "bradford"
+      "name": "Bradford Hospital"
     }
   }, {
     "request": {
@@ -28,6 +36,10 @@
     },
     "resource": {
       "id": "b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+      "text": {
+        "status": "additional",
+	"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Sue Williams, a team professional at Airedale Hospital</div>"
+      },
       "resourceType": "Practitioner",
       "name": [
         {
@@ -51,6 +63,10 @@
     },
     "resource": {
       "id": "387f7b1a-95d2-440e-8804-470fd50573fc",
+      "text": {
+        "status": "additional",
+	"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Tina Jansen, an individual professional</div>"
+      },
       "resourceType": "Practitioner",
       "name": [
         {
@@ -74,6 +90,10 @@
     },
     "resource": {
       "id": "127c747d-5455-43e6-9d65-10948da03126",
+      "text": {
+        "status": "additional",
+	"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Sue Williams' professional link to Airedale Hospital</div>"
+      },
       "resourceType": "PractitionerRole",
       "active": true,
       "period": {
@@ -109,5 +129,209 @@
         }
       ]
     }
-  }]
+  },{
+    "request": {
+      "method": "PUT",
+      "url": "Patient/8c455d7a-fe6b-4e4f-9144-66fbc945b5de"
+    },
+    "resource": {
+      "resourceType": "Patient",
+      "id": "8c455d7a-fe6b-4e4f-9144-66fbc945b5de",
+      "text": {
+        "status": "additional",
+	"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Patient Carol</div>"
+      },
+      "name": [{
+        "use": "official",
+	"family": "Walker",
+	"given": ["Carol"]
+      }],
+      "gender": "female",
+      "birthDate": "1980-01-01",
+      "deceasedBoolean": false
+    }
+  },{
+    "request": {
+      "method": "PUT",
+      "url": "Patient/1401dfb4-7740-4051-a534-7ff2d25ced75"
+    },
+    "resource": {
+      "resourceType": "Patient",
+      "id": "1401dfb4-7740-4051-a534-7ff2d25ced75",
+      "text": {
+        "status": "additional",
+	"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Patient Daniel</div>"
+      },
+      "name": [{
+        "use": "official",
+	"family": "Johnson",
+	"given": ["Daniel"]
+      }],
+      "gender": "male",
+      "birthDate": "1980-01-02",
+      "deceasedBoolean": false
+    }
+  },{
+    "request": {
+      "method": "PUT",
+      "url": "Patient/666a2a30-a142-4929-ac88-27243e602c01"
+    },
+    "resource": {
+      "resourceType": "Patient",
+      "id": "666a2a30-a142-4929-ac88-27243e602c01",
+      "text": {
+        "status": "additional",
+	"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Patient Abe, who has sharing disabled</div>"
+      },
+      "name": [{
+        "use": "official",
+	"family": "Nisham",
+	"given": ["Abe"]
+      }],
+      "gender": "male",
+      "birthDate": "1980-02-02",
+      "deceasedBoolean": false,
+      "extension": [{
+        "url": "http://fhir.patientsknowbest.com/structuredefinition/sharing-disabled",
+	"valueBoolean": true
+      }]
+    }
+  },{
+    "request": {
+      "method": "PUT",
+      "url": "Patient/9cd3b4b3-3fb1-4ef7-b16d-a2a2fad57667"
+    },
+    "resource": {
+      "resourceType": "Patient",
+      "id": "9cd3b4b3-3fb1-4ef7-b16d-a2a2fad57667",
+      "text": {
+        "status": "additional",
+	"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Patient Zenu, who is access frozen</div>"
+      },
+      "name": [{
+        "use": "official",
+	"family": "Zog",
+	"given": ["Zenu"]
+      }],
+      "gender": "male",
+      "birthDate": "1980-02-02",
+      "deceasedBoolean": false,
+      "extension": [{
+        "url": "http://fhir.patientsknowbest.com/structuredefinition/access-frozen",
+	"valueBoolean": true
+      }]
+    }
+  },{
+    "request": {
+      "method": "PUT",
+      "url": "Consent/85dae4b6-8a4f-46cc-9116-2e510670e18b"
+    },
+    "resource": {
+      "resourceType": "Consent",
+      "id": "85dae4b6-8a4f-46cc-9116-2e510670e18b",
+      "text": {
+        "status": "additional",
+	"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Carol grants all consents to Airedale Hospital</div>"
+      },
+      "provision": {
+        "type": "deny",
+        "actor": [{
+          "reference": {
+            "display": "Airedale Hospital",
+            "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915"
+          },
+          "role": {
+            "coding": [{
+              "code": "CONSENTER",
+              "system": "http://hl7.org/fhir/v3/RoleCode"
+            }]
+          }
+        }],
+        "except": [{
+          "securityLabel": [{
+            "code": "GENERAL_HEALTH",
+            "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+          }],
+          "type": "permit"
+        },{
+          "securityLabel": [{
+            "code": "MENTAL_HEALTH",
+            "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+          }],
+          "type": "permit"
+        },{
+          "securityLabel": [{
+            "code": "SEXUAL_HEALTH",
+            "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+          }],
+          "type": "permit"
+        },{
+          "securityLabel": [{
+            "code": "SOCIAL_CARE",
+            "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+          }],
+          "type": "permit"
+        }]
+      },
+      "patient": {
+        "display": "Carol Walker",
+        "reference": "Patient/8c455d7a-fe6b-4e4f-9144-66fbc945b5de"
+      },
+      "policy": [{
+          "authority": "http://www.patientsknowbest.com"
+      }],
+      "resourceType": "Consent",
+      "status": "active"
+    }
+  },{
+    "request": {
+      "method": "PUT",
+      "url": "Consent/2c8b3e64-e3cf-4007-9097-2f36533b1fac"
+    },
+    "resource": {
+      "resourceType": "Consent",
+      "id": "2c8b3e64-e3cf-4007-9097-2f36533b1fac",
+      "text": {
+        "status": "additional",
+	"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Daniel grants General and Mental Health consents to Airedale Hospital</div>"
+      },
+      "actor": [{
+        "reference": {
+          "display": "Airedale Hospital",
+          "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915"
+        },
+        "role": {
+          "coding": [{
+            "code": "CONSENTER",
+            "system": "http://hl7.org/fhir/v3/RoleCode"
+          }]
+        }
+      }],
+      "except": [{
+        "securityLabel": [{
+          "code": "GENERAL_HEALTH",
+          "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+        }],
+        "type": "permit"
+      },{
+        "securityLabel": [{
+          "code": "MENTAL_HEALTH",
+          "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+        }],
+        "type": "permit"
+      }],
+      "patient": {
+        "display": "Daniel Johnson",
+        "reference": "Patient/1401dfb4-7740-4051-a534-7ff2d25ced75"
+      },
+      "policy": [
+        {
+          "authority": "http://www.patientsknowbest.com"
+        }
+      ],
+      "resourceType": "Consent",
+      "status": "active"
+      }
+    }
+  ]
 }
