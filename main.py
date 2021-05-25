@@ -5,14 +5,26 @@ from requests import get
 from urllib.parse import urljoin, urlsplit, urlunsplit
 from oso import Oso, polar_class
 from json import loads
+from glom import glom
 
 address = "http://localhost:8000/fhir"
-upstream = "http://fhiruser:change-password@localhost:8080/fhir-server/api/v4"
+upstream = "https://fhiruser:change-password@localhost:9443/fhir-server/api/v4"
+
+oo_unauthorized = b"""{
+  "resourceType": "OperationOutcome",
+  "id": "unauthorized",
+  "issue": [
+    {
+      "severity": "error",
+      "code": "forbidden",
+      "details": {
+        "text": "You are not authorized to see this resource"
+      }
+    }
+  ]
+}"""
 
 oso = None
-
-class AuthzError(Exception):
-    pass
 
 @polar_class
 class Resource:
@@ -27,12 +39,14 @@ class Patient(Resource):
         super().__init__(resource)
         self.isAccessFrozen = False
         self.isSharingDisabled = False
-        consentres = get("{}/Consent?patient={}".format(upstream, "Patient/{}".format(self.id))).json()
+        consent_seach_res = get("{}/Consent?patient={}".format(upstream, "Patient/{}".format(self.id)), verify=False).json()
         self.consents = {}
-        for e in consentres.get("entry", []):
-            aref = e["provision"]["actor"]["reference"]
-            labels = e["provision"]["securityLabel"]
-            self.consents[aref.split("/")[1]] = [l["code"] for l in labels]
+        for entry in consent_seach_res.get("entry", []):
+            actor_refs = glom(entry, ("resource.provision.actor", ["reference.reference"]))
+            consent_flags = glom(entry, ("resource.provision.securityLabel", ["code"]))
+            for actor_ref in actor_refs:
+                actor_id = actor_ref.split("/")[1]
+                self.consents[actor_id] = consent_flags
     def __repr__(self):
         return "Patient(super={},isAccessFrozen={},isSharingDisabled={},consents={})".format(\
                 super().__repr__(), self.isAccessFrozen, self.isSharingDisabled, self.consents)
@@ -41,10 +55,17 @@ class Patient(Resource):
 class Practitioner(Resource):
     def __init__(self, resource):
         super().__init__(resource)
-        self.isTeamPro = False
+        roles = get("{}/PractitionerRole?practitioner=Practitioner/{}".format(upstream, self.id), verify=False).json()
+        self.teamId = None
+        for entry in roles.get("entry", []):
+            # Should only be one for now
+            ref = glom(entry, "resource.organization.reference")
+            self.teamId = ref.split("/")[1]
+            break
+        self.isTeamPro = bool(self.teamId)
 
     def __repr__(self):
-        return "Practitioner(super={},isTeamPro={})".format(super().__repr__(), self.isTeamPro)
+        return "Practitioner(super={},teamId={},isTeamPro={})".format(super().__repr__(), self.teamId, self.isTeamPro)
 
 @polar_class
 class RelatedPerson(Resource):
@@ -57,10 +78,14 @@ class RelatedPerson(Resource):
 class PatientResource(Resource):
     def __init__(self, resource):
         super().__init__(resource)
-        patres = resource_to_authz(get("{}/{}".format(upstream, resource["patient"]["reference"])).json())
-        self.patient = patres
+        self.patient = resource_to_authz(get("{}/{}".format(upstream, glom(resource, "patient.reference")), verify=False).json())
+        self.privacyFlag = glom(resource, ("meta.security", ["code"]))[0] # Should be exactly one privacy label!
+        provenance = get("{}/Provenance?target={}".format(upstream, "{}/{}".format(resource["resourceType"], resource["id"])), verify=False).json()
+        for entry in provenance.get("entry", []):
+            refs = glom(entry, ("resource.agent", ["who.reference"])) # Should filter for 'author' relation here.
+            self.sourceIds = [ref.split("/")[1] for ref in refs]
     def __repr__(self):
-        return "PatientResource(super={},patient={})".format(super().__repr__(), self.patient)
+        return "PatientResource(super={},privacyFlag={},patient={})".format(super().__repr__(), self.privacyFlag, self.patient)
 
 @polar_class
 class Immunization(PatientResource):
@@ -80,7 +105,7 @@ def resource_to_authz(resource):
     elif rtype == "RelatedPerson":
         return RelatedPerson(resource)
     else:
-        raise AuthzError("Resource type {} is not supported".format(rtype))
+        return None # Simply won't match any authorization rules.
 
 class FHIRGateHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -100,21 +125,19 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
 
     def _handle(self, method):
         url_request = urlsplit(self.path)
-
-        # // TODO: MFA - Parse out the request information about the actor, 
-        # This should typically come from keycloak rather than a hard-coded ID.
-        # If will be one of the Person-type resources: Patient, Practitioner, or RelatedPerson
-        actor_ref = "Patient/1799108bb14-b87fc3b1-068f-4f6d-8e03-8f977886e625"
-        actor = resource_to_authz(get("{}/{}".format(upstream, actor_ref)).json())
         
         # Parse out the operation, see http://hl7.org/fhir/http.html
         req = parse_request("GET", url_request.path)
 
+        # Short circuit public endpoint
         if req.op == "capabilities":
             resp = proxy_request(address, upstream, url_request)
             return_response(resp, resp.text, self)
-        elif req.id:
-            resource = resource_to_authz(get("{}/{}/{}".format(upstream, req.resource, req.id)).json())
+            return
+        
+        actor = resource_to_authz(get("{}/{}".format(upstream, self.headers["X-Actor-Ref"]), verify=False).json())
+        if req.id:
+            resource = resource_to_authz(get("{}/{}/{}".format(upstream, req.resource, req.id), verify=False).json())
             print("about to authorize")
             print("ACTOR  {}".format(actor))
             print("ACTION {}".format(req.op))
@@ -125,6 +148,7 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
             else:
                 self.send_response(401, "Permission denied")
                 self.end_headers()
+                self.wfile.write(oo_unauthorized)
         elif req.op == "create":
             length = int(self.headers['content-length'])
             resource = resource_to_authz(loads(self.rfile.read(length)))

@@ -12,6 +12,20 @@ Prerequisites:
 - python
 - python-pip
 - python-virtualenv
+- a FHIR server
+
+Optional: 
+- httpie (for command line interaction with APIs)
+
+For a quick FHIR server setup, run the IBM FHIR Server docker image:
+```
+docker run -p 9443:9443 -e BOOTSTRAP_DB=true ibmcom/ibm-fhir-server
+```
+
+Then preload it with sample data:
+```
+http --verify no --auth 'fhiruser:change-password' POST https://localhost:9443/fhir-server/api/v4/ < data/batch.json
+```
 
 Install and run:
 ```
@@ -21,7 +35,10 @@ pip install -r requirements.txt
 python main.py
 ```
 
-The server is listening on port 8000
+Run the 'integration test' script which shows some sample authz successes and failures.
+```
+python main_it.py
+```
 
 TODO:
 - FHIR client

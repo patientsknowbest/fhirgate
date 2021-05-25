@@ -2,17 +2,17 @@
 # Typical 'Medical data' points (Immunization, MedicationStatement etc)
 allow(patient: Patient, "read", immunization: Immunization) if
     access_frozen_check(patient) and
-        self_check(patient, immumization);
+        self_check(patient, immunization);
 
 allow(carer: RelatedPerson, "read", immunization: Immunization) if
     access_frozen_check(carer, immunization) and (  
         source_check(carer, immunization) or
         consent_check(carer, immunization));
 
-allow(practitioner, Practitioner, "read", immunization: Immunization) if
+allow(practitioner: Practitioner, "read", immunization: Immunization) if
     access_frozen_check(practitioner, immunization) and (  
         source_check(practitioner, immunization) or
-        consent_check(practitioner, immunization));
+            consent_check(practitioner, immunization));
 
 # Access frozen #
 access_frozen_check(patient: Patient) if 
@@ -31,20 +31,20 @@ self_check(patient: Patient, resource) if
     resource.patient.id == patient.id;
 
 # source access (AKA team data view) #
-source_check(carer: RelatedPerson, resource: PatientResource) if
-    resource.sourcePersonId == carer.id;
+source_check(carer: RelatedPerson, resource) if
+    carer.id in resource.sourceIds;
 
-source_check(practitioner: Practitioner, resource: PatientResource) if
-    resource.sourceTeamId == practitioner.teamId or
-        resource.sourcePersonId == practitioner.id;
+source_check(practitioner: Practitioner, resource) if
+    practitioner.id in resource.sourceIds or
+        practitioner.teamId in resource.sourceIds;
 
 # consent access #
-consent_check(carer: RelatedPerson, resource: PatientResource) if
+consent_check(carer: RelatedPerson, resource) if
     sharing_disabled_check(resource) and (
     	carerId = carer.id and
         resource.privacyFlag in resource.patient.consents.(carerId));
 
-consent_check(practitioner: Practitioner, resource: PatientResource) if
+consent_check(practitioner: Practitioner, resource) if
     sharing_disabled_check(practitioner, resource) and
         (practitioner.isBtgActive or (
 	    practitionerId = practitioner.id and
@@ -52,10 +52,10 @@ consent_check(practitioner: Practitioner, resource: PatientResource) if
             resource.privacyFlag in resource.patient.consents.(practitionerId)
 	        or resource.privacyFlag in resource.patient.consents.(practitionerTeamId)));
 
-sharing_disabled_check(resource: PatientResource) if
+sharing_disabled_check(resource) if
     not resource.patient.isSharingDisabled;
 
-sharing_disabled_check(practitioner: Practitioner, resource: PatientResource) if
+sharing_disabled_check(practitioner: Practitioner, resource) if
     practitioner.isTeamPro or
         not resource.patient.isSharingDisabled;
 
