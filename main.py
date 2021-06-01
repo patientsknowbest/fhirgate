@@ -1,14 +1,21 @@
 from sys import stderr
 from collections import defaultdict
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from requests import get
-from urllib.parse import urljoin, urlsplit, urlunsplit
+import requests
+from urllib.parse import urljoin, urlsplit, urlunsplit, parse_qs
 from oso import Oso, polar_class
+from polar import Variable
+from polar.exceptions import PolarRuntimeError
+from polar.partial import TypeConstraint
 from json import loads
 from glom import glom
 
 address = "http://localhost:8000/fhir"
 upstream = "https://fhiruser:change-password@localhost:9443/fhir-server/api/v4"
+
+session = requests.Session()
+# // TODO: MFA - Don't do this in production
+session.verify = False
 
 oo_unauthorized = b"""{
   "resourceType": "OperationOutcome",
@@ -29,7 +36,7 @@ oso = None
 @polar_class
 class Resource:
     def __init__(self, resource):
-        self.id = resource["id"]
+        self.id = resource.get("id", None)
     def __repr__(self):
         return "Resource(id={})".format(self.id)
 
@@ -39,7 +46,7 @@ class Patient(Resource):
         super().__init__(resource)
         self.isAccessFrozen = False
         self.isSharingDisabled = False
-        consent_seach_res = get("{}/Consent?patient={}".format(upstream, "Patient/{}".format(self.id)), verify=False).json()
+        consent_seach_res = session.get("{}/Consent?patient={}".format(upstream, "Patient/{}".format(self.id))).json()
         self.consents = {}
         for entry in consent_seach_res.get("entry", []):
             actor_refs = glom(entry, ("resource.provision.actor", ["reference.reference"]))
@@ -55,7 +62,7 @@ class Patient(Resource):
 class Practitioner(Resource):
     def __init__(self, resource):
         super().__init__(resource)
-        roles = get("{}/PractitionerRole?practitioner=Practitioner/{}".format(upstream, self.id), verify=False).json()
+        roles = session.get("{}/PractitionerRole?practitioner=Practitioner/{}".format(upstream, self.id)).json()
         self.teamId = None
         for entry in roles.get("entry", []):
             # Should only be one for now
@@ -63,6 +70,7 @@ class Practitioner(Resource):
             self.teamId = ref.split("/")[1]
             break
         self.isTeamPro = bool(self.teamId)
+        self.isBtgActive = False # // TODO: MFA - pull from session
 
     def __repr__(self):
         return "Practitioner(super={},teamId={},isTeamPro={})".format(super().__repr__(), self.teamId, self.isTeamPro)
@@ -78,12 +86,13 @@ class RelatedPerson(Resource):
 class PatientResource(Resource):
     def __init__(self, resource):
         super().__init__(resource)
-        self.patient = resource_to_authz(get("{}/{}".format(upstream, glom(resource, "patient.reference")), verify=False).json())
-        self.privacyFlag = glom(resource, ("meta.security", ["code"]))[0] # Should be exactly one privacy label!
-        provenance = get("{}/Provenance?target={}".format(upstream, "{}/{}".format(resource["resourceType"], resource["id"])), verify=False).json()
-        for entry in provenance.get("entry", []):
-            refs = glom(entry, ("resource.agent", ["who.reference"])) # Should filter for 'author' relation here.
-            self.sourceIds = [ref.split("/")[1] for ref in refs]
+        self.patient = resource_to_authz(session.get("{}/{}".format(upstream, glom(resource, "patient.reference"))).json())
+        self.privacyFlag = glom(resource, ("meta.security", ["code"]), default=[None])[0] # Should be exactly one privacy label!
+        if "id" in resource:
+            provenance = session.get("{}/Provenance?target={}".format(upstream, "{}/{}".format(resource["resourceType"], resource["id"]))).json()
+            for entry in provenance.get("entry", []):
+                refs = glom(entry, ("resource.agent", ["who.reference"])) # Should filter for 'author' relation here.
+                self.sourceIds = [ref.split("/")[1] for ref in refs]
     def __repr__(self):
         return "PatientResource(super={},privacyFlag={},patient={})".format(super().__repr__(), self.privacyFlag, self.patient)
 
@@ -105,7 +114,7 @@ def resource_to_authz(resource):
     elif rtype == "RelatedPerson":
         return RelatedPerson(resource)
     else:
-        return None # Simply won't match any authorization rules.
+        return None
 
 class FHIRGateHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -135,9 +144,12 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
             return_response(resp, resp.text, self)
             return
         
-        actor = resource_to_authz(get("{}/{}".format(upstream, self.headers["X-Actor-Ref"]), verify=False).json())
+        actor = resource_to_authz(session.get("{}/{}".format(upstream, self.headers["X-Actor-Ref"])).json())
+        
+        ## Simple case: operations where the ID of the target is known upfront. Just fetch the relevant resource
+        ## and do the authorization on that before proxying the request.
         if req.id:
-            resource = resource_to_authz(get("{}/{}/{}".format(upstream, req.resource, req.id), verify=False).json())
+            resource = resource_to_authz(session.get("{}/{}/{}".format(upstream, req.resource, req.id)).json())
             print("about to authorize")
             print("ACTOR  {}".format(actor))
             print("ACTION {}".format(req.op))
@@ -163,10 +175,29 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
                 self.send_response(401, "Permission denied")
                 self.end_headers()
         elif req.op == "search":
-            print("WARNING authz not implemented for search", file=stderr)
-            # Parse out the search params and authorize the search
-            # Then proxy
-            # Then MAYBE double check the results
+            # TODO: MFA - How do I pass in known values here?
+            #  I'm looking for a way to bind information known upfront 
+            #  so that I can produce a simpler set of query parameters for the upstream server
+            params = parse_qs(url_request.query)
+            if "patient" in params:
+                patient = resource_to_authz(session.get("{}/{}".format(upstream, params["patient"])).json())
+            resource = Variable("resource")
+             
+            constraint = TypeConstraint(resource, req.resource)
+            results = oso.query_rule(
+                "allow",
+                actor,
+                "read", # search and read follow the same access control rules.
+                resource,
+                bindings={resource: constraint},
+                accept_expression=True,
+            )
+            # // TODO: MFA - Turn `results` here into additional query parameters to restrict our results
+            # to just the ones we're allowed to see.
+            for res in results:
+                for arg in glom(res, "bindings.resource.args"):
+                    print(arg)
+            
             resp = proxy_request(address, upstream, url_request)
             return_response(resp, resp.text, self)
         else: 
@@ -189,7 +220,7 @@ def proxy_request(ownaddress, upstream, url_request):
     url_new = url_new._replace(netloc=url_upstream.netloc)
     new_path = url_request.path.replace(url_self.path, url_upstream.path, 1)
     url_new = url_new._replace(path=new_path)
-    return get(urlunsplit(url_new), verify=False)
+    return session.get(urlunsplit(url_new))
         
 
 class ParseError(Exception):
@@ -197,7 +228,7 @@ class ParseError(Exception):
 
 
 class ParseResult:
-    def __init__(self, op, resource, id):
+    def __init__(self, op: str, resource: str, id: str):
         self.op = op
         self.resource = resource
         self.id = id

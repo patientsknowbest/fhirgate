@@ -9,10 +9,19 @@ SUE     = "Practitioner/b60de836-3dfd-4172-90fd-bc1efb4b0adb"
 
 if __name__=="__main__":
     # Self-access is allowed
-    print(get("http://localhost:8000/fhir/Immunization/8b24c826-bd6b-11eb-ac21-8387a23fcaa5", headers={"X-Actor-Ref": CAROL}).json())
+    # print(get("http://localhost:8000/fhir/Immunization/8b24c826-bd6b-11eb-ac21-8387a23fcaa5", headers={"X-Actor-Ref": CAROL}).json())
     
     # Accessing unrelated person is not
-    print(get("http://localhost:8000/fhir/Immunization/8b24c826-bd6b-11eb-ac21-8387a23fcaa5", headers={"X-Actor-Ref": ABE}).json())
+    # print(get("http://localhost:8000/fhir/Immunization/8b24c826-bd6b-11eb-ac21-8387a23fcaa5", headers={"X-Actor-Ref": ABE}).json())
     
     # Accessing data where we are the source, 
-    print(get("http://localhost:8000/fhir/Immunization/8b24c826-bd6b-11eb-ac21-8387a23fcaa5", headers={"X-Actor-Ref": SUE}).json())
+    # print(get("http://localhost:8000/fhir/Immunization/8b24c826-bd6b-11eb-ac21-8387a23fcaa5", headers={"X-Actor-Ref": SUE}).json())
+
+    # Abe can't read Carol's Immunization records (no relation)
+    # print(get("http://localhost:8000/fhir/Immunization?patient={}".format(CAROL), headers={"X-Actor-Ref": ABE}).json())
+    
+    # Carol _can_ read Carol's Immunization records
+    # print(get("http://localhost:8000/fhir/Immunization?patient={}".format(CAROL), headers={"X-Actor-Ref": CAROL}).json())
+    
+    # Sue can read Carol's immunization records, because she authored them.
+    print(get("http://localhost:8000/fhir/Immunization?patient={}".format(CAROL), headers={"X-Actor-Ref": SUE}).json())
