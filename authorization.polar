@@ -41,14 +41,14 @@ source_check(practitioner: Practitioner, resource) if
 # consent access #
 consent_check(carer: RelatedPerson, resource) if
     sharing_disabled_check(resource) and (
-    	carerId = carer.id and
+    	carerId := carer.id and
         resource.privacyFlag in resource.patient.consents.(carerId));
 
 consent_check(practitioner: Practitioner, resource) if
     sharing_disabled_check(practitioner, resource) and
         (practitioner.isBtgActive or (
-	    practitionerId = practitioner.id and
-	    practitionerTeamId = practitioner.teamId and
+	    practitionerId := practitioner.id and
+	    practitionerTeamId := practitioner.teamId and
             resource.privacyFlag in resource.patient.consents.(practitionerId)
 	        or resource.privacyFlag in resource.patient.consents.(practitionerTeamId)));
 
