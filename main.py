@@ -195,6 +195,7 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
             # // TODO: MFA - Turn `results` here into additional query parameters to restrict our results
             # to just the ones we're allowed to see.
             for res in results:
+                print("-------OR------")
                 for arg in glom(res, "bindings.resource.args"):
                     print(arg)
             
