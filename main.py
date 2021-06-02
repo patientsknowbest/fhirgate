@@ -2,11 +2,12 @@ from sys import stderr
 from collections import defaultdict
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import requests
-from urllib.parse import urljoin, urlsplit, urlunsplit, parse_qs
+from urllib.parse import urljoin, urlsplit, urlunsplit, parse_qs, urlencode
 from oso import Oso, polar_class
 from polar import Variable
 from polar.exceptions import PolarRuntimeError
 from polar.partial import TypeConstraint
+from polar.expression import Expression
 from json import loads
 from glom import glom
 
@@ -175,31 +176,70 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
                 self.send_response(401, "Permission denied")
                 self.end_headers()
         elif req.op == "search":
-            # TODO: MFA - How do I pass in known values here?
-            #  I'm looking for a way to bind information known upfront 
-            #  so that I can produce a simpler set of query parameters for the upstream server
+            # We don't know all the resources upfront, so use Oso's partial evaluation feature to apply what we _can_ 
+            # upfront, and turn the remaining parts into additional query parameters to add for the upstream server
+            resource = Variable("resource")
+            
+            ## Start off with just the type constraint
+            constraint = TypeConstraint(resource, req.resource)
+            
+            ## Add any other constraints we can infer from the existing query parameters
             params = parse_qs(url_request.query)
             if "patient" in params:
-                patient = resource_to_authz(session.get("{}/{}".format(upstream, params["patient"])).json())
-            resource = Variable("resource")
-             
-            constraint = TypeConstraint(resource, req.resource)
+                # Resolve the actual patient 
+                patient = resource_to_authz(session.get("{}/{}".format(upstream, params["patient"][0])).json())
+                # Add the constraint to Oso's constraints
+                constraint.args.append(
+                    Expression("Unify", [
+                        patient,
+                        Expression("Dot", [Variable("_this"), "patient"])
+                    ]))
+
+            # Query oso, apply those rules
             results = oso.query_rule(
                 "allow",
                 actor,
                 "read", # search and read follow the same access control rules.
                 resource,
-                bindings={resource: constraint},
+                bindings={resource: constraint}, 
                 accept_expression=True,
             )
-            # // TODO: MFA - Turn `results` here into additional query parameters to restrict our results
+
+            # Turn `results` here into additional query parameters to restrict our results
             # to just the ones we're allowed to see.
+            # Just print for debugging right now
             for res in results:
                 print("-------OR------")
+                print(glom(res, "bindings.resource.operator"))
                 for arg in glom(res, "bindings.resource.args"):
                     print(arg)
+                # params[...] = ...
             
-            resp = proxy_request(address, upstream, url_request)
+            # One sample output from this (there are several for other success paths like sourceIds):
+            
+            # Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+            # Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+            # Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+            # Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isAccessFrozen'])])
+            # Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isSharingDisabled'])])
+            # Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), Expression(Dot, [Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'consents']), '11b7a2ba-17a4-4cec-a6f7-c664ba560915'])])
+            
+            # So.. I was hoping that the `Unify` operation would substitute the `patient` variable in the other
+            # expressions with the actual Patient value that I have. Example desired expression:
+            
+            # Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']])
+            
+            ## I want to do this because I'm limited in the complexity of query parameters I can add to the forwarded 
+            ## request. For example, privacyFlag=GENERAL_HEALTH,MENTAL_HEALTH would be OK, or sourceIds=123,345 
+            ## but I can't use variables to reference patient on the resource. It's not SQL!
+            
+            # Pass the request on to the upstream server with additional params
+            resp = proxy_request(address, upstream, url_request._replace(query=urlencode(params)))
+            
+            # If there were Expressions that we couldn't transform, then our search might contain 
+            # results we aren't supposed to see. Fallback here to just authorizing all the objects in the list
+            # and filter them out if we aren't supposed to see them?
+            # resp = filter(resp)
             return_response(resp, resp.text, self)
         else: 
             self.send_response(400, "Unsupported operation {}".format(req.op))
