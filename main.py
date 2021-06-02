@@ -215,19 +215,91 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
                     print(arg)
                 # params[...] = ...
             
-            # One sample output from this (there are several for other success paths like sourceIds):
-            
-            # Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
-            # Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
-            # Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
-            # Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isAccessFrozen'])])
-            # Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isSharingDisabled'])])
-            # Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), Expression(Dot, [Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'consents']), '11b7a2ba-17a4-4cec-a6f7-c664ba560915'])])
-            
-            # So.. I was hoping that the `Unify` operation would substitute the `patient` variable in the other
-            # expressions with the actual Patient value that I have. Example desired expression:
-            
-            # Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']])
+            # Sample output
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(In, ['b60de836-3dfd-4172-90fd-bc1efb4b0adb', Expression(Dot, [Variable('_this'), 'sourceIds'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(In, ['11b7a2ba-17a4-4cec-a6f7-c664ba560915', Expression(Dot, [Variable('_this'), 'sourceIds'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), Expression(Dot, [Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'consents']), 'b60de836-3dfd-4172-90fd-bc1efb4b0adb'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), Expression(Dot, [Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'consents']), '11b7a2ba-17a4-4cec-a6f7-c664ba560915'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isSharingDisabled'])])
+# Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), Expression(Dot, [Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'consents']), 'b60de836-3dfd-4172-90fd-bc1efb4b0adb'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isSharingDisabled'])])
+# Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), Expression(Dot, [Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'consents']), '11b7a2ba-17a4-4cec-a6f7-c664ba560915'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isAccessFrozen'])])
+# Expression(In, ['b60de836-3dfd-4172-90fd-bc1efb4b0adb', Expression(Dot, [Variable('_this'), 'sourceIds'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isAccessFrozen'])])
+# Expression(In, ['11b7a2ba-17a4-4cec-a6f7-c664ba560915', Expression(Dot, [Variable('_this'), 'sourceIds'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isAccessFrozen'])])
+# Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), Expression(Dot, [Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'consents']), 'b60de836-3dfd-4172-90fd-bc1efb4b0adb'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isAccessFrozen'])])
+# Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), Expression(Dot, [Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'consents']), '11b7a2ba-17a4-4cec-a6f7-c664ba560915'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isAccessFrozen'])])
+# Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isSharingDisabled'])])
+# Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), Expression(Dot, [Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'consents']), 'b60de836-3dfd-4172-90fd-bc1efb4b0adb'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isAccessFrozen'])])
+# Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isSharingDisabled'])])
+# Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), Expression(Dot, [Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'consents']), '11b7a2ba-17a4-4cec-a6f7-c664ba560915'])])
+                                                                                                                                # So.. I was hoping that the `Unify` operation would substitute the `patient` variable in the other
+            # expressions with the actual Patient value that I have.
             
             ## I want to do this because I'm limited in the complexity of query parameters I can add to the forwarded 
             ## request. For example, privacyFlag=GENERAL_HEALTH,MENTAL_HEALTH would be OK, or sourceIds=123,345 
