@@ -1,15 +1,21 @@
 ### Pseudo-polar for our full authorization rules using imaginary data types ###
 # Typical 'Medical data' points (Immunization, MedicationStatement etc)
 allow(patient: Patient, "read", resource: Immunization, subject: Patient, sourceIds) if
+    resource.patient = subject and 
+    resource.sourceIds = sourceIds and
     access_frozen_check(patient) and
         self_check(patient, subject);
 
 allow(carer: RelatedPerson, "read", resource: Immunization, subject: Patient, sourceIds) if
+    resource.patient = subject and 
+    resource.sourceIds = sourceIds and
     access_frozen_check(carer, subject) and (  
         source_check(carer, sourceIds) or
         consent_check(carer, resource, subject));
 
 allow(practitioner: Practitioner, "read", resource: Immunization, subject: Patient, sourceIds) if
+    resource.patient = subject and 
+    resource.sourceIds = sourceIds and
     access_frozen_check(practitioner, subject) and (  
         source_check(practitioner, sourceIds) or
             consent_check(practitioner, resource, subject));
