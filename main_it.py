@@ -8,16 +8,16 @@ ZENU    = "Patient/9cd3b4b3-3fb1-4ef7-b16d-a2a2fad57667" # Access frozen
 SUE     = "Practitioner/b60de836-3dfd-4172-90fd-bc1efb4b0adb"
 
 if __name__=="__main__":
-    # Self-access is allowed
+    # # Self-access is allowed
     # print(get("http://localhost:8000/fhir/Immunization/8b24c826-bd6b-11eb-ac21-8387a23fcaa5", headers={"X-Actor-Ref": CAROL}).json())
-    
-    # Accessing unrelated person is not
+    # 
+    # # Accessing unrelated person is not
     # print(get("http://localhost:8000/fhir/Immunization/8b24c826-bd6b-11eb-ac21-8387a23fcaa5", headers={"X-Actor-Ref": ABE}).json())
-    
-    # Accessing data where we are the source, 
+    # 
+    # # Accessing data where we are the source, 
     # print(get("http://localhost:8000/fhir/Immunization/8b24c826-bd6b-11eb-ac21-8387a23fcaa5", headers={"X-Actor-Ref": SUE}).json())
-
-    # Abe can't read Carol's Immunization records (no relation)
+    # 
+    # # Abe can't read Carol's Immunization records (no relation)
     # print(get("http://localhost:8000/fhir/Immunization?patient={}".format(CAROL), headers={"X-Actor-Ref": ABE}).json())
     
     # Carol _can_ read Carol's Immunization records

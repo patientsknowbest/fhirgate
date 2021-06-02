@@ -2,7 +2,7 @@ from sys import stderr
 from collections import defaultdict
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import requests
-from urllib.parse import urljoin, urlsplit, urlunsplit, parse_qs, urlencode
+from urllib.parse import urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
 from oso import Oso, polar_class
 from polar import Variable
 from polar.exceptions import PolarRuntimeError
@@ -117,6 +117,13 @@ def resource_to_authz(resource):
     else:
         return None
 
+def osoallow(oso, *args):
+    try:
+        next(oso.query_rule("allow", *args))
+        return True
+    except StopIteration:
+        return False
+
 class FHIRGateHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self._handle("GET")
@@ -155,7 +162,7 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
             print("ACTOR  {}".format(actor))
             print("ACTION {}".format(req.op))
             print("TARGET {}".format(resource))
-            if oso.is_allowed(actor, req.op, resource):
+            if osoallow(oso, actor, req.op, resource, resource.patient, resource.sourceIds):
                 resp = proxy_request(address, upstream, url_request)
                 return_response(resp, resp.text, self)
             else:
@@ -169,7 +176,7 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
             print("ACTOR  {}".format(actor))
             print("ACTION {}".format(req.op))
             print("TARGET {}".format(resource))
-            if oso.is_allowed(actor, req.op, resource):
+            if osoallow(oso, actor, req.op, resource, resource.patient, resource.sourceIds):
                 resp = proxy_request(address, upstream, url_request)
                 return_response(resp, resp.text, self)
             else:
@@ -179,21 +186,17 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
             # We don't know all the resources upfront, so use Oso's partial evaluation feature to apply what we _can_ 
             # upfront, and turn the remaining parts into additional query parameters to add for the upstream server
             resource = Variable("resource")
-            
-            ## Start off with just the type constraint
             constraint = TypeConstraint(resource, req.resource)
+            subject = Variable("subject")
+            sourceIds = Variable("sourceIds")
             
             ## Add any other constraints we can infer from the existing query parameters
-            params = parse_qs(url_request.query)
-            if "patient" in params:
-                # Resolve the actual patient 
-                patient = resource_to_authz(session.get("{}/{}".format(upstream, params["patient"][0])).json())
-                # Add the constraint to Oso's constraints
-                constraint.args.append(
-                    Expression("Unify", [
-                        patient,
-                        Expression("Dot", [Variable("_this"), "patient"])
-                    ]))
+            params = parse_qsl(url_request.query)
+            dparams = dict(params) # // TODO: MFA - this won't fly with multiple query params with the same name
+            if "patient" in dparams:
+                # Resolve the actual patient
+                subject = resource_to_authz(session.get("{}/{}".format(upstream, dparams["patient"])).json())
+            ## // TODO: MFA - Same for sourceIds
 
             # Query oso, apply those rules
             results = oso.query_rule(
@@ -201,7 +204,9 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
                 actor,
                 "read", # search and read follow the same access control rules.
                 resource,
-                bindings={resource: constraint}, 
+                subject, 
+                sourceIds,
+                bindings={resource: constraint},
                 accept_expression=True,
             )
 
@@ -215,26 +220,106 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
                     print(arg)
                 # params[...] = ...
             
-            # One sample output from this (there are several for other success paths like sourceIds):
-            
-            # Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
-            # Expression(Unify, [Patient(super=Resource(id=8c455d7a-fe6b-4e4f-9144-66fbc945b5de),isAccessFrozen=False,isSharingDisabled=False,consents={'11b7a2ba-17a4-4cec-a6f7-c664ba560915': ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']}), Expression(Dot, [Variable('_this'), 'patient'])])
-            # Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
-            # Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isAccessFrozen'])])
-            # Expression(Neq, [True, Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'isSharingDisabled'])])
-            # Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), Expression(Dot, [Expression(Dot, [Expression(Dot, [Variable('_this'), 'patient']), 'consents']), '11b7a2ba-17a4-4cec-a6f7-c664ba560915'])])
-            
-            # So.. I was hoping that the `Unify` operation would substitute the `patient` variable in the other
-            # expressions with the actual Patient value that I have. Example desired expression:
-            
-            # Expression(In, [Expression(Dot, [Variable('_this'), 'privacyFlag']), ['GENERAL_HEALTH', 'MENTAL_HEALTH', 'SEXUAL_HEALTH', 'SOCIAL_CARE']])
-            
-            ## I want to do this because I'm limited in the complexity of query parameters I can add to the forwarded 
+            # Sample output
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['GENERAL_HEALTH', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['MENTAL_HEALTH', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['SEXUAL_HEALTH', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['SOCIAL_CARE', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['GENERAL_HEALTH', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['MENTAL_HEALTH', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['SEXUAL_HEALTH', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['SOCIAL_CARE', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['GENERAL_HEALTH', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['MENTAL_HEALTH', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['SEXUAL_HEALTH', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['SOCIAL_CARE', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['GENERAL_HEALTH', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['MENTAL_HEALTH', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['SEXUAL_HEALTH', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+# -------OR------
+# And
+# Expression(Isa, [Variable('_this'), Pattern(Immunization, {})])
+# Expression(Isa, [Variable('_this'), Pattern(PatientResource, {})])
+# Expression(Unify, ['SOCIAL_CARE', Expression(Dot, [Variable('_this'), 'privacyFlag'])])
+                                                                                                                                ## I want to do this because I'm limited in the complexity of query parameters I can add to the forwarded 
             ## request. For example, privacyFlag=GENERAL_HEALTH,MENTAL_HEALTH would be OK, or sourceIds=123,345 
             ## but I can't use variables to reference patient on the resource. It's not SQL!
             
             # Pass the request on to the upstream server with additional params
-            resp = proxy_request(address, upstream, url_request._replace(query=urlencode(params)))
+            new_url = url_request._replace(query=urlencode(params))
+            resp = proxy_request(address, upstream, new_url)
             
             # If there were Expressions that we couldn't transform, then our search might contain 
             # results we aren't supposed to see. Fallback here to just authorizing all the objects in the list

@@ -1,63 +1,63 @@
 ### Pseudo-polar for our full authorization rules using imaginary data types ###
 # Typical 'Medical data' points (Immunization, MedicationStatement etc)
-allow(patient: Patient, "read", immunization: Immunization) if
+allow(patient: Patient, "read", resource: Immunization, subject: Patient, sourceIds) if
     access_frozen_check(patient) and
-        self_check(patient, immunization);
+        self_check(patient, subject);
 
-allow(carer: RelatedPerson, "read", immunization: Immunization) if
-    access_frozen_check(carer, immunization) and (  
-        source_check(carer, immunization) or
-        consent_check(carer, immunization));
+allow(carer: RelatedPerson, "read", resource: Immunization, subject: Patient, sourceIds) if
+    access_frozen_check(carer, subject) and (  
+        source_check(carer, sourceIds) or
+        consent_check(carer, resource, subject));
 
-allow(practitioner: Practitioner, "read", immunization: Immunization) if
-    access_frozen_check(practitioner, immunization) and (  
-        source_check(practitioner, immunization) or
-            consent_check(practitioner, immunization));
+allow(practitioner: Practitioner, "read", resource: Immunization, subject: Patient, sourceIds) if
+    access_frozen_check(practitioner, subject) and (  
+        source_check(practitioner, sourceIds) or
+            consent_check(practitioner, resource, subject));
 
 # Access frozen #
 access_frozen_check(patient: Patient) if 
     not patient.isAccessFrozen;
 
-access_frozen_check(carer: RelatedPerson, resource: PatientResource) if
+access_frozen_check(carer: RelatedPerson, subject: Patient) if
     not carer.isAccessFrozen and 
-        not resource.patient.isAccessFrozen;
+        not subject.isAccessFrozen;
 
-access_frozen_check(practitioner: Practitioner, resource: PatientResource) if
+access_frozen_check(practitioner: Practitioner, subject: Patient) if
     practitioner.isTeamPro or
-    	not resource.patient.isAccessFrozen;
+    	not subject.isAccessFrozen;
 
 # self access #
-self_check(patient: Patient, resource) if
-    resource.patient.id == patient.id;
+self_check(patient: Patient, subject: Patient) if
+    subject.id == patient.id;
 
 # source access (AKA team data view) #
-source_check(carer: RelatedPerson, resource) if
-    carer.id in resource.sourceIds;
+source_check(carer: RelatedPerson, sourceIds) if
+    carer.id in sourceIds;
 
-source_check(practitioner: Practitioner, resource) if
-    practitioner.id in resource.sourceIds or
-        practitioner.teamId in resource.sourceIds;
+source_check(practitioner: Practitioner, sourceIds) if
+    practitioner.id in sourceIds or
+        practitioner.teamId in sourceIds;
 
 # consent access #
-consent_check(carer: RelatedPerson, resource) if
-    sharing_disabled_check(resource) and (
+consent_check(carer: RelatedPerson, resource: PatientResource, subject: Patient) if
+    sharing_disabled_check(subject) and (
     	carerId := carer.id and
-        resource.privacyFlag in resource.patient.consents.(carerId));
+        resource.privacyFlag in subject.consents.(carerId));
 
-consent_check(practitioner: Practitioner, resource) if
-    sharing_disabled_check(practitioner, resource) and
+consent_check(practitioner: Practitioner, resource: PatientResource, subject: Patient) if
+    sharing_disabled_check(practitioner, subject) and
         (practitioner.isBtgActive or (
 	    practitionerId := practitioner.id and
 	    practitionerTeamId := practitioner.teamId and
-            resource.privacyFlag in resource.patient.consents.(practitionerId)
-	        or resource.privacyFlag in resource.patient.consents.(practitionerTeamId)));
+            resource.privacyFlag in subject.consents.(practitionerId)
+	        or resource.privacyFlag in subject.consents.(practitionerTeamId)));
 
-sharing_disabled_check(resource) if
-    not resource.patient.isSharingDisabled;
+sharing_disabled_check(subject: Patient) if
+    not subject.isSharingDisabled;
 
-sharing_disabled_check(practitioner: Practitioner, resource) if
+sharing_disabled_check(practitioner: Practitioner, subject: Patient) if
     practitioner.isTeamPro or
-        not resource.patient.isSharingDisabled;
+        not subject.isSharingDisabled;
 
 # More complex Communication type
 # allow(actor: Actor, operation: String, communication: Communication) if 
