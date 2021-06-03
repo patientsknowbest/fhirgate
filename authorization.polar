@@ -1,12 +1,16 @@
-### Pseudo-polar for our full authorization rules using imaginary data types ###
 # Typical 'Medical data' points (Immunization, MedicationStatement etc)
+
+# Pass in subject and sourceIds separately. Polar isn't quite smart enough to substitute known parts of 
+# Variables passed in, so we use multiple varables representing things that may or may not be known upfront
 allow(patient: Patient, "read", resource: Immunization, subject: Patient, sourceIds) if
+    # bind these here so that we only have to look at the bindings for 'resource' in the results
     resource.patient = subject and 
     resource.sourceIds = sourceIds and
     access_frozen_check(patient) and
         self_check(patient, subject);
 
 allow(carer: RelatedPerson, "read", resource: Immunization, subject: Patient, sourceIds) if
+    # bind these here so that we only have to look at the bindings for 'resource' in the results
     resource.patient = subject and 
     resource.sourceIds = sourceIds and
     access_frozen_check(carer, subject) and (  
@@ -14,6 +18,7 @@ allow(carer: RelatedPerson, "read", resource: Immunization, subject: Patient, so
         consent_check(carer, resource, subject));
 
 allow(practitioner: Practitioner, "read", resource: Immunization, subject: Patient, sourceIds) if
+    # bind these here so that we only have to look at the bindings for 'resource' in the results
     resource.patient = subject and 
     resource.sourceIds = sourceIds and
     access_frozen_check(practitioner, subject) and (  

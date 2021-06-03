@@ -343,6 +343,11 @@
             {
               "code": "GENERAL_HEALTH",
               "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
             }
           ]
         },
