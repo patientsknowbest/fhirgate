@@ -1,5 +1,7 @@
 from unittest import TestCase, main
-from main import parse_request, ParseError, ParseResult, Patient, expression_to_params, results_to_params
+from expression_to_params import expression_to_params, results_to_params
+from request_parse import ParseError, ParseResult, parse_request
+from authz_types import Patient
 from polar import Variable
 from polar.expression import Expression, Pattern
 
