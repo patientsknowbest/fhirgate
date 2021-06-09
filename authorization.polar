@@ -56,19 +56,15 @@ consent_check(carer: RelatedPerson, resource: PatientResource, subject: Patient)
         resource.privacyFlag in subject.consents.(carerId));
 
 consent_check(practitioner: Practitioner, resource: PatientResource, subject: Patient) if
-    sharing_disabled_check(practitioner, subject) and
+    sharing_disabled_check(subject) and
         (practitioner.isBtgActive or (
 	    practitionerId := practitioner.id and
 	    practitionerTeamId := practitioner.teamId and
-            resource.privacyFlag in subject.consents.(practitionerId)
-	        or resource.privacyFlag in subject.consents.(practitionerTeamId)));
+            (resource.privacyFlag in subject.consents.(practitionerId)
+	        or resource.privacyFlag in subject.consents.(practitionerTeamId))));
 
 sharing_disabled_check(subject: Patient) if
     not subject.isSharingDisabled;
-
-sharing_disabled_check(practitioner: Practitioner, subject: Patient) if
-    practitioner.isTeamPro or
-        not subject.isSharingDisabled;
 
 # More complex Communication type
 # allow(actor: Actor, operation: String, communication: Communication) if 

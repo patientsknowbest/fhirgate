@@ -19,30 +19,28 @@ Optional:
 
 For a quick FHIR server setup, run the IBM FHIR Server docker image:
 ```
-docker run -p 9443:9443 -e BOOTSTRAP_DB=true ibmcom/ibm-fhir-server
+docker run -d -p 9443:9443 -e BOOTSTRAP_DB=true ibmcom/ibm-fhir-server
 ```
 
-Then preload it with sample data:
-```
-http --verify no --auth 'fhiruser:change-password' POST https://localhost:9443/fhir-server/api/v4/ < data/batch.json
-```
-
-Install and run:
+Activate the virtual environment and get dependencies installed
 ```
 virtualenv env
 source env/bin/activate
 pip install -r requirements.txt
-python main.py
 ```
 
-Run the 'integration test' script which shows some sample authz successes and failures.
+Preload sample data:
+```
+python load.py
+```
+
+Run the fhirgate server:
+```
+python main.py&
+```
+
+Run the 'integration test' script.
 ```
 python main_it.py
 ```
 
-TODO:
-- FHIR client
-- fetching data and mapping to flat types for authz
-- forwarding read requests and post-filtering
-- forwarding search requests and adding query params
-- keycloak integration

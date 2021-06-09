@@ -1,0 +1,81 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Practitioner/b60de836-3dfd-4172-90fd-bc1efb4b0adb"
+      },
+      "resource": {
+        "id": "b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Sue Williams, a team professional at Airedale Hospital</div>"
+        },
+        "resourceType": "Practitioner",
+        "name": [
+          {
+            "use": "official",
+            "family": "Williams",
+            "given": [
+              "Sue"
+            ],
+            "suffix": [
+              "MD"
+            ]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1975-12-07"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "PractitionerRole/127c747d-5455-43e6-9d65-10948da03126"
+      },
+      "resource": {
+        "id": "127c747d-5455-43e6-9d65-10948da03126",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Sue Williams' professional link to Airedale Hospital</div>"
+        },
+        "resourceType": "PractitionerRole",
+        "active": true,
+        "period": {
+          "start": "2012-01-01"
+        },
+        "practitioner": {
+          "reference": "Practitioner/b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+          "display": "Dr Sue Williams"
+        },
+        "organization": {
+          "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+          "display": "airedale"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0286",
+                "code": "RP"
+              }
+            ]
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "408443003",
+                "display": "General medical practice"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

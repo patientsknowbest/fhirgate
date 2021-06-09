@@ -1,0 +1,21 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915"
+      },
+      "resource": {
+        "id": "11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">>Airedale Hospital</div>"
+        },
+        "resourceType": "Organization",
+        "name": "Airedale Hospital"
+      }
+    }
+  ]
+}

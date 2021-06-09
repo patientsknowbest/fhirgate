@@ -1,0 +1,21 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Organization/30fcc0e2-4705-4dd3-b020-d900672a286c"
+      },
+      "resource": {
+        "id": "30fcc0e2-4705-4dd3-b020-d900672a286c",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Bradford Hospital</div>"
+        },
+        "resourceType": "Organization",
+        "name": "Bradford Hospital"
+      }
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Practitioner/eef0c81c-4482-4287-99ed-3b77f629c399"
+      },
+      "resource": {
+        "id": "eef0c81c-4482-4287-99ed-3b77f629c399",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Tina Jansen, an individual professional</div>"
+        },
+        "resourceType": "Practitioner",
+        "name": [
+          {
+            "use": "official",
+            "family": "Smith",
+            "given": [
+              "David"
+            ],
+            "suffix": [
+              "MD"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1975-12-07"
+      }
+    }
+  ]
+}

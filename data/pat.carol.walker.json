@@ -1,0 +1,358 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Patient/8c455d7a-fe6b-4e4f-9144-66fbc945b5de"
+      },
+      "resource": {
+        "resourceType": "Patient",
+        "id": "8c455d7a-fe6b-4e4f-9144-66fbc945b5de",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Patient Carol Walker</div>"
+        },
+        "name": [
+          {
+            "use": "official",
+            "family": "Walker",
+            "given": [
+              "Carol"
+            ]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1980-01-01",
+        "deceasedBoolean": false
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Consent/85dae4b6-8a4f-46cc-9116-2e510670e18b"
+      },
+      "resource": {
+        "resourceType": "Consent",
+        "id": "85dae4b6-8a4f-46cc-9116-2e510670e18b",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Carol grants General Health to Airedale Hospital</div>"
+        },
+        "scope": {
+          "coding": [
+            {
+              "code": "patient-privacy",
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "INFA",
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+              }
+            ]
+          }
+        ],
+        "provision": {
+          "type": "permit",
+          "actor": [
+            {
+              "reference": {
+                "display": "Airedale Hospital",
+                "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915"
+              },
+              "role": {
+                "coding": [
+                  {
+                    "code": "CONSENTER",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+                  }
+                ]
+              }
+            }
+          ],
+          "securityLabel": [
+            {
+              "code": "GENERAL_HEALTH",
+              "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+            }
+          ]
+        },
+        "patient": {
+          "display": "Carol Walker",
+          "reference": "Patient/8c455d7a-fe6b-4e4f-9144-66fbc945b5de"
+        },
+        "policy": [
+          {
+            "authority": "http://www.patientsknowbest.com"
+          }
+        ],
+        "status": "active"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Consent/d3a2b732-6be7-4d59-b1be-d26d14404ce9"
+      },
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d3a2b732-6be7-4d59-b1be-d26d14404ce9",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Carol grants General Health to Bradford Hospital</div>"
+        },
+        "scope": {
+          "coding": [
+            {
+              "code": "patient-privacy",
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "INFA",
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+              }
+            ]
+          }
+        ],
+        "provision": {
+          "type": "permit",
+          "actor": [
+            {
+              "reference": {
+                "display": "Bradford Hospital",
+                "reference": "Organization/30fcc0e2-4705-4dd3-b020-d900672a286c"
+              },
+              "role": {
+                "coding": [
+                  {
+                    "code": "CONSENTER",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+                  }
+                ]
+              }
+            }
+          ],
+          "securityLabel": [
+            {
+              "code": "GENERAL_HEALTH",
+              "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+            }
+          ]
+        },
+        "patient": {
+          "display": "Carol Walker",
+          "reference": "Patient/8c455d7a-fe6b-4e4f-9144-66fbc945b5de"
+        },
+        "policy": [
+          {
+            "authority": "http://www.patientsknowbest.com"
+          }
+        ],
+        "status": "active"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Immunization/8b24c826-bd6b-11eb-ac21-8387a23fcaa5"
+      },
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "8b24c826-bd6b-11eb-ac21-8387a23fcaa5",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Carol's Flu Vaccine, given at Airedale Hospital, with General Health categorization</div>"
+        },
+        "meta": {
+          "security": [
+            {
+              "code": "GENERAL_HEALTH",
+              "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
+            }
+          ]
+        },
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "urn:oid:1.2.36.1.2001.1005.17",
+              "code": "FLUVAX"
+            }
+          ],
+          "text": "Fluvax (Influenza)"
+        },
+        "patient": {
+          "reference": "Patient/8c455d7a-fe6b-4e4f-9144-66fbc945b5de"
+        },
+        "occurrenceDateTime": "2019-01-10"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Provenance/fb54ba24-bd6c-11eb-9493-6fa5cde1e21f"
+      },
+      "resource": {
+        "resourceType": "Provenance",
+        "id": "fb54ba24-bd6c-11eb-9493-6fa5cde1e21f",
+        "recorded": "2019-01-01T00:00:00Z",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Provenance information for Carol's Flu Vaccine</div>"
+        },
+        "target": [
+          {
+            "reference": "Immunization/8b24c826-bd6b-11eb-ac21-8387a23fcaa5"
+          }
+        ],
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "Practitioner/b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "display": "Dr Sue Williams"
+            }
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+              "display": "Airedale Hospital"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Immunization/cfaf9c9d-458a-4635-bf3d-bf258690f973"
+      },
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "cfaf9c9d-458a-4635-bf3d-bf258690f973",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Carol's HIB Vaccine, given at Airedale Hospital by Sue Williams, with Sexual Health categorization</div>"
+        },
+        "meta": {
+          "security": [
+            {
+              "code": "SEXUAL_HEALTH",
+              "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
+            }
+          ]
+        },
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "urn:oid:1.2.36.1.2001.1005.17",
+              "code": "HIB"
+            }
+          ],
+          "text": "HIB"
+        },
+        "patient": {
+          "reference": "Patient/8c455d7a-fe6b-4e4f-9144-66fbc945b5de"
+        },
+        "occurrenceDateTime": "2019-01-10"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Provenance/68bbb4fd-82fc-42be-b500-835fb150e5ee"
+      },
+      "resource": {
+        "resourceType": "Provenance",
+        "id": "68bbb4fd-82fc-42be-b500-835fb150e5ee",
+        "recorded": "2019-01-01T00:00:00Z",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Provenance information for Carol's Hib Vaccine</div>"
+        },
+        "target": [
+          {
+            "reference": "Immunization/cfaf9c9d-458a-4635-bf3d-bf258690f973"
+          }
+        ],
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "Practitioner/b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "display": "Dr Sue Williams"
+            }
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+              "display": "Airedale Hospital"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

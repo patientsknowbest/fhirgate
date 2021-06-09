@@ -1,0 +1,297 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Patient/666a2a30-a142-4929-ac88-27243e602c01"
+      },
+      "resource": {
+        "resourceType": "Patient",
+        "id": "666a2a30-a142-4929-ac88-27243e602c01",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Patient Abe, who has sharing disabled</div>"
+        },
+        "name": [
+          {
+            "use": "official",
+            "family": "Nisham",
+            "given": [
+              "Abe"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1980-02-02",
+        "deceasedBoolean": false,
+        "extension": [
+          {
+            "url": "http://fhir.patientsknowbest.com/structuredefinition/sharing-disabled",
+            "valueBoolean": true
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Consent/d7519c5d-08ab-4041-88b3-b9f8f2161f1d"
+      },
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d7519c5d-08ab-4041-88b3-b9f8f2161f1d",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Carol grants General Health to Airedale Hospital</div>"
+        },
+        "scope": {
+          "coding": [
+            {
+              "code": "patient-privacy",
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "INFA",
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+              }
+            ]
+          }
+        ],
+        "provision": {
+          "type": "permit",
+          "actor": [
+            {
+              "reference": {
+                "display": "Airedale Hospital",
+                "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915"
+              },
+              "role": {
+                "coding": [
+                  {
+                    "code": "CONSENTER",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+                  }
+                ]
+              }
+            }
+          ],
+          "securityLabel": [
+            {
+              "code": "GENERAL_HEALTH",
+              "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+            }
+          ]
+        },
+        "patient": {
+          "display": "Abe Nisham",
+          "reference": "Patient/666a2a30-a142-4929-ac88-27243e602c01"
+        },
+        "policy": [
+          {
+            "authority": "http://www.patientsknowbest.com"
+          }
+        ],
+        "status": "active"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Immunization/8f26f460-20d2-4c17-9686-3601b15ef07a"
+      },
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "8f26f460-20d2-4c17-9686-3601b15ef07a",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Abe's Flu Vaccine, given at Airedale Hospital, with General Health categorization</div>"
+        },
+        "meta": {
+          "security": [
+            {
+              "code": "GENERAL_HEALTH",
+              "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
+            }
+          ]
+        },
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "urn:oid:1.2.36.1.2001.1005.17",
+              "code": "FLUVAX"
+            }
+          ],
+          "text": "Fluvax (Influenza)"
+        },
+        "patient": {
+          "reference": "Patient/666a2a30-a142-4929-ac88-27243e602c01"
+        },
+        "occurrenceDateTime": "2019-01-10"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Provenance/0ac8e9a9-a9f7-42b2-aba7-0239f3e3e7c9"
+      },
+      "resource": {
+        "resourceType": "Provenance",
+        "id": "0ac8e9a9-a9f7-42b2-aba7-0239f3e3e7c9",
+        "recorded": "2019-01-01T00:00:00Z",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Provenance information for Abe's Flu Vaccine</div>"
+        },
+        "target": [
+          {
+            "reference": "Immunization/8f26f460-20d2-4c17-9686-3601b15ef07a"
+          }
+        ],
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "Practitioner/b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "display": "Dr Sue Williams"
+            }
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+              "display": "Airedale Hospital"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Immunization/efc48758-8a87-4d18-8b99-2a5980f6c10d"
+      },
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "efc48758-8a87-4d18-8b99-2a5980f6c10d",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Abe's hib Vaccine, given at Airedale Hospital, with General Health categorization</div>"
+        },
+        "meta": {
+          "security": [
+            {
+              "code": "SEXUAL_HEALTH",
+              "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
+            }
+          ]
+        },
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "urn:oid:1.2.36.1.2001.1005.17",
+              "code": "HIB"
+            }
+          ],
+          "text": "hib"
+        },
+        "patient": {
+          "reference": "Patient/666a2a30-a142-4929-ac88-27243e602c01"
+        },
+        "occurrenceDateTime": "2019-01-10"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Provenance/2c810148-759b-4c4c-9df5-ed4e6a870a95"
+      },
+      "resource": {
+        "resourceType": "Provenance",
+        "id": "2c810148-759b-4c4c-9df5-ed4e6a870a95",
+        "recorded": "2019-01-01T00:00:00Z",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Provenance information for Abe's hib Vaccine</div>"
+        },
+        "target": [
+          {
+            "reference": "Immunization/efc48758-8a87-4d18-8b99-2a5980f6c10d"
+          }
+        ],
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "Practitioner/b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "display": "Dr Sue Williams"
+            }
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+              "display": "Airedale Hospital"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

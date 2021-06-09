@@ -1,0 +1,81 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Practitioner/28a8017c-610d-4e82-8b7d-3b0e574982b2"
+      },
+      "resource": {
+        "id": "28a8017c-610d-4e82-8b7d-3b0e574982b2",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Sue Williams, a team professional at Airedale Hospital</div>"
+        },
+        "resourceType": "Practitioner",
+        "name": [
+          {
+            "use": "official",
+            "family": "Southall",
+            "given": [
+              "Billy"
+            ],
+            "suffix": [
+              "MD"
+            ]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1975-12-07"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "PractitionerRole/552b6cdc-98e2-45fe-8914-f3c76c00a827"
+      },
+      "resource": {
+        "id": "552b6cdc-98e2-45fe-8914-f3c76c00a827",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Sue Williams' professional link to Airedale Hospital</div>"
+        },
+        "resourceType": "PractitionerRole",
+        "active": true,
+        "period": {
+          "start": "2012-01-01"
+        },
+        "practitioner": {
+          "reference": "Practitioner/28a8017c-610d-4e82-8b7d-3b0e574982b2",
+          "display": "Dr Billy Southall"
+        },
+        "organization": {
+          "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+          "display": "airedale"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0286",
+                "code": "RP"
+              }
+            ]
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "408443003",
+                "display": "General medical practice"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

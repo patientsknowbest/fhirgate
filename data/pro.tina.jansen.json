@@ -1,0 +1,81 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Practitioner/387f7b1a-95d2-440e-8804-470fd50573fc"
+      },
+      "resource": {
+        "id": "387f7b1a-95d2-440e-8804-470fd50573fc",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Tina Jansen, an individual professional</div>"
+        },
+        "resourceType": "Practitioner",
+        "name": [
+          {
+            "use": "official",
+            "family": "Jansen",
+            "given": [
+              "Tina"
+            ],
+            "suffix": [
+              "MD"
+            ]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1975-12-07"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "PractitionerRole/0f4da914-4b27-47a6-b940-579a6d173122"
+      },
+      "resource": {
+        "id": "0f4da914-4b27-47a6-b940-579a6d173122",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Tina Jansen's professional link to Bradford Hospital</div>"
+        },
+        "resourceType": "PractitionerRole",
+        "active": true,
+        "period": {
+          "start": "2012-01-01"
+        },
+        "practitioner": {
+          "reference": "Practitioner/387f7b1a-95d2-440e-8804-470fd50573fc",
+          "display": "Ms Tina Jansen"
+        },
+        "organization": {
+          "reference": "Organization/30fcc0e2-4705-4dd3-b020-d900672a286c",
+          "display": "bradford"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0286",
+                "code": "RP"
+              }
+            ]
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "408443003",
+                "display": "General medical practice"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

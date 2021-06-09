@@ -1,0 +1,365 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Patient/7b513f42-3536-4852-8a38-6ccb6d0ae62d"
+      },
+      "resource": {
+        "resourceType": "Patient",
+        "id": "7b513f42-3536-4852-8a38-6ccb6d0ae62d",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Patient Zenu, who has sharing disabled</div>"
+        },
+        "name": [
+          {
+            "use": "official",
+            "family": "Sequioa",
+            "given": [
+              "Zenu"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1980-02-02",
+        "deceasedBoolean": false,
+        "extension": [
+          {
+            "url": "http://fhir.patientsknowbest.com/structuredefinition/access-frozen",
+            "valueBoolean": true
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Consent/e853c139-a7cf-4afa-a705-4e06c9000725"
+      },
+      "resource": {
+        "resourceType": "Consent",
+        "id": "e853c139-a7cf-4afa-a705-4e06c9000725",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Zenu grants General Health to Airedale Hospital</div>"
+        },
+        "scope": {
+          "coding": [
+            {
+              "code": "patient-privacy",
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "INFA",
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+              }
+            ]
+          }
+        ],
+        "provision": {
+          "type": "permit",
+          "actor": [
+            {
+              "reference": {
+                "display": "Airedale Hospital",
+                "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915"
+              },
+              "role": {
+                "coding": [
+                  {
+                    "code": "CONSENTER",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+                  }
+                ]
+              }
+            }
+          ],
+          "securityLabel": [
+            {
+              "code": "GENERAL_HEALTH",
+              "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+            }
+          ]
+        },
+        "patient": {
+          "display": "Zenu Sequioa",
+          "reference": "Patient/7b513f42-3536-4852-8a38-6ccb6d0ae62d"
+        },
+        "policy": [
+          {
+            "authority": "http://www.patientsknowbest.com"
+          }
+        ],
+        "status": "active"
+      }
+    },
+
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Consent/2366ba75-95a7-425f-aed2-b409d2da36d2"
+      },
+      "resource": {
+        "resourceType": "Consent",
+        "id": "2366ba75-95a7-425f-aed2-b409d2da36d2",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Zenu grants General Health to Bradford Hospital</div>"
+        },
+        "scope": {
+          "coding": [
+            {
+              "code": "patient-privacy",
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "INFA",
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+              }
+            ]
+          }
+        ],
+        "provision": {
+          "type": "permit",
+          "actor": [
+            {
+              "reference": {
+                "display": "Bradford Hospital",
+                "reference": "Organization/30fcc0e2-4705-4dd3-b020-d900672a286c"
+              },
+              "role": {
+                "coding": [
+                  {
+                    "code": "CONSENTER",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+                  }
+                ]
+              }
+            }
+          ],
+          "securityLabel": [
+            {
+              "code": "GENERAL_HEALTH",
+              "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+            }
+          ]
+        },
+        "patient": {
+          "display": "Zenu Sequioa",
+          "reference": "Patient/7b513f42-3536-4852-8a38-6ccb6d0ae62d"
+        },
+        "policy": [
+          {
+            "authority": "http://www.patientsknowbest.com"
+          }
+        ],
+        "status": "active"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Immunization/3982dde0-af75-4983-90c4-e7779493d931"
+      },
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "3982dde0-af75-4983-90c4-e7779493d931",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Zenu's Flu Vaccine, given at Airedale Hospital, with General Health categorization</div>"
+        },
+        "meta": {
+          "security": [
+            {
+              "code": "GENERAL_HEALTH",
+              "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
+            }
+          ]
+        },
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "urn:oid:1.2.36.1.2001.1005.17",
+              "code": "FLUVAX"
+            }
+          ],
+          "text": "Fluvax (Influenza)"
+        },
+        "patient": {
+          "reference": "Patient/7b513f42-3536-4852-8a38-6ccb6d0ae62d"
+        },
+        "occurrenceDateTime": "2019-01-10"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Provenance/2b641a13-dc83-475e-9279-cead949b3eed"
+      },
+      "resource": {
+        "resourceType": "Provenance",
+        "id": "2b641a13-dc83-475e-9279-cead949b3eed",
+        "recorded": "2019-01-01T00:00:00Z",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Provenance information for Zenu's Flu Vaccine</div>"
+        },
+        "target": [
+          {
+            "reference": "Immunization/3982dde0-af75-4983-90c4-e7779493d931"
+          }
+        ],
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "Practitioner/b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "display": "Dr Sue Williams"
+            }
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+              "display": "Airedale Hospital"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Immunization/84a39ca6-abd5-4f64-b8a9-b2aae63ddcf6"
+      },
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "84a39ca6-abd5-4f64-b8a9-b2aae63ddcf6",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Zenu's hib Vaccine, given at Airedale Hospital, with General Health categorization</div>"
+        },
+        "meta": {
+          "security": [
+            {
+              "code": "SEXUAL_HEALTH",
+              "system": "http://fhir.patientsknowbest.com/codesystem/privacy-label"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
+            },
+            {
+              "display": "this is denormalized data from Provenance, and probably an abuse of a code field, but it makes filtering on source OR privacy flag easy",
+              "code": "11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+              "system": "http://fhir.patientsknowbest.com/codesystem/source-id"
+            }
+          ]
+        },
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "urn:oid:1.2.36.1.2001.1005.17",
+              "code": "HIB"
+            }
+          ],
+          "text": "hib"
+        },
+        "patient": {
+          "reference": "Patient/7b513f42-3536-4852-8a38-6ccb6d0ae62d"
+        },
+        "occurrenceDateTime": "2019-01-10"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Provenance/84ebe66e-84e7-4e6d-b4cd-ce2e15e25802"
+      },
+      "resource": {
+        "resourceType": "Provenance",
+        "id": "84ebe66e-84e7-4e6d-b4cd-ce2e15e25802",
+        "recorded": "2019-01-01T00:00:00Z",
+        "text": {
+          "status": "additional",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Provenance information for Zenu's hib Vaccine</div>"
+        },
+        "target": [
+          {
+            "reference": "Immunization/84a39ca6-abd5-4f64-b8a9-b2aae63ddcf6"
+          }
+        ],
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "Practitioner/b60de836-3dfd-4172-90fd-bc1efb4b0adb",
+              "display": "Dr Sue Williams"
+            }
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "Organization/11b7a2ba-17a4-4cec-a6f7-c664ba560915",
+              "display": "Airedale Hospital"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

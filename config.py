@@ -14,3 +14,17 @@ oo_unauthorized = b"""{
     }
   ]
 }"""
+
+oo_notfound = b"""{
+  "resourceType": "OperationOutcome",
+  "id": "notfound",
+  "issue": [
+    {
+      "severity": "error",
+      "code": "not-found",
+      "details": {
+        "text": "Resource not found"
+      }
+    }
+  ]
+}"""

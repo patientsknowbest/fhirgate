@@ -18,6 +18,13 @@ class Resource:
 
 def patient_from_resource(session, resource):
     id = resource.get("id", None)
+    isAccessFrozen = False
+    isSharingDisabled = False
+    for extension in resource.get("extension", []):
+        if extension["url"] == "http://fhir.patientsknowbest.com/structuredefinition/sharing-disabled" and extension["valueBoolean"]:
+            isSharingDisabled = True
+        if extension["url"] == "http://fhir.patientsknowbest.com/structuredefinition/access-frozen" and extension["valueBoolean"]:
+            isAccessFrozen = True
     consent_seach_res = session.get("{}/Consent?patient={}".format(upstream, "Patient/{}".format(id))).json()
     consents = {}
     for entry in consent_seach_res.get("entry", []):
@@ -26,7 +33,7 @@ def patient_from_resource(session, resource):
         for actor_ref in actor_refs:
             actor_id = actor_ref.split("/")[1]
             consents[actor_id] = consent_flags
-    return Patient(id, False, False, consents)
+    return Patient(id, isAccessFrozen, isSharingDisabled, consents)
 
 
 @polar_class
@@ -80,12 +87,11 @@ class RelatedPerson(Resource):
     def __repr__(self):
         return "RelatedPerson(super={})".format(super().__repr__())
 
-
 @polar_class
 class PatientResource(Resource):
-    def __init__(self, resource):
+    def __init__(self, session, resource):
         super().__init__(resource.get("id", None))
-        self.patient = resource_to_authz(session.get("{}/{}".format(upstream, glom(resource, "patient.reference"))).json())
+        self.patient = resource_to_authz(session, session.get("{}/{}".format(upstream, glom(resource, "patient.reference"))).json())
         self.privacyFlag = glom(resource, ("meta.security", ["code"]), default=[None])[0] # Should be exactly one privacy label!
         if "id" in resource:
             provenance = session.get("{}/Provenance?target={}".format(upstream, "{}/{}".format(resource["resourceType"], resource["id"]))).json()
@@ -98,8 +104,8 @@ class PatientResource(Resource):
 
 @polar_class
 class Immunization(PatientResource):
-    def __init__(self, resource):
-        super().__init__(resource)
+    def __init__(self, session, resource):
+        super().__init__(session, resource)
     def __repr__(self):
         return "Immunization(super={})".format(super().__repr__())
 
@@ -107,7 +113,7 @@ class Immunization(PatientResource):
 def resource_to_authz(session, resource):
     rtype = resource["resourceType"]
     if rtype == "Immunization":
-        return Immunization(resource)
+        return Immunization(session, resource)
     elif rtype == "Patient":
         return patient_from_resource(session, resource)
     elif rtype == "Practitioner":

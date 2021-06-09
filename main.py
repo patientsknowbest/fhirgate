@@ -9,7 +9,7 @@ from json import loads
 from authz_types import resource_to_authz
 from expression_to_params import results_to_params
 from request_parse import parse_request
-from config import upstream, address, oo_unauthorized
+from config import upstream, address, oo_unauthorized, oo_notfound
 
 session = requests.Session()
 session.verify = False
@@ -59,6 +59,10 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
         ## and do the authorization on that before proxying the request.
         if req.id:
             resource = resource_to_authz(session, session.get("{}/{}/{}".format(upstream, req.resource, req.id)).json())
+            if not resource:
+                self.send_response(404, "Not found")
+                self.end_headers()
+                self.wfile.write(oo_notfound)
             print("about to authorize")
             print("ACTOR  {}".format(actor))
             print("ACTION {}".format(req.op))
@@ -112,12 +116,22 @@ class FHIRGateHandler(BaseHTTPRequestHandler):
                 bindings={resource: constraint},
                 accept_expression=True,
             )
-
-            # Turn the evaluation results to additional query params before proxying the request
-            params.extend(results_to_params(results))
-            new_url = url_request._replace(query=urlencode(params))
-            resp = proxy_request(address, upstream, new_url)
-            return_response(resp, resp.text, self)
+            lresults = [res for res in results]
+            if len(lresults) > 0:
+                # Turn the evaluation results to additional query params before proxying the request
+                extra_params = results_to_params(lresults)
+                print("Extending search parameters with ", extra_params)
+                params.extend(extra_params)
+                new_url = url_request._replace(query=urlencode(params))
+                resp = proxy_request(address, upstream, new_url)
+                # if any results couldn't be transformed to query parameters, this is where we could post-filter the 
+                # result (although it could be inefficient for large results, and would interfere with paging)
+                return_response(resp, resp.text, self)
+            else:
+                # No results indicates authorization failure based solely on upfront information 
+                self.send_response(401, "Permission denied")
+                self.end_headers()
+                self.wfile.write(oo_unauthorized)
         else:
             self.send_response(400, "Unsupported operation {}".format(req.op))
             self.end_headers()
