@@ -11,7 +11,7 @@ This is a proof of concept only. Do not use it.
 fhirgate acts as a Policy Decision Point & Policy Enforcement Point in front of a FHIR API server (also known as an API 
 gateway). The FHIR API server itself is used as the Policy Information Point.
 
-authorization rules are implemented using [oso](osohq.com) which allows utilizing the same policy for read and search 
+authorization rules are implemented using [oso](http://osohq.com) which allows utilizing the same policy for read and search 
 operations. Read operations are authorized post-fetch by inspecting the returned resource. Search operations have 
 mandatory additional query parameters applied before the request is forwarded to the target FHIR server.
 
